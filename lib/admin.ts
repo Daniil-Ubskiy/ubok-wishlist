@@ -1,7 +1,13 @@
+import { timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 
 export const ADMIN_COOKIE = "wl_admin";
 const ONE_DAY = 60 * 60 * 24;
+
+function safeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  return timingSafeEqual(Buffer.from(a), Buffer.from(b));
+}
 
 export async function isAdmin(): Promise<boolean> {
   const expected = process.env.ADMIN_TOKEN;
@@ -9,13 +15,14 @@ export async function isAdmin(): Promise<boolean> {
 
   const cookieStore = await cookies();
   const value = cookieStore.get(ADMIN_COOKIE)?.value;
-  return value === expected;
+  if (!value) return false;
+  return safeEqual(value, expected);
 }
 
 export function checkAdminPassword(password: string): boolean {
   const expected = process.env.ADMIN_PASSWORD;
   if (!expected) return false;
-  return password === expected;
+  return safeEqual(password, expected);
 }
 
 export async function setAdminCookie(): Promise<void> {

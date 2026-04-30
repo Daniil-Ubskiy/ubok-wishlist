@@ -3,12 +3,41 @@ import { isAdmin } from "@/lib/admin";
 import { supabaseAdmin, GIFTS_BUCKET } from "@/lib/supabase";
 
 const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
-const ALLOWED_TYPES = [
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "image/gif",
-];
+
+type ImageType = "jpeg" | "png" | "webp" | "gif";
+
+function detectImageType(buf: Buffer): ImageType | null {
+  if (buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff) return "jpeg";
+  if (
+    buf[0] === 0x89 &&
+    buf[1] === 0x50 &&
+    buf[2] === 0x4e &&
+    buf[3] === 0x47
+  )
+    return "png";
+  if (
+    buf.slice(0, 4).toString("ascii") === "RIFF" &&
+    buf.slice(8, 12).toString("ascii") === "WEBP"
+  )
+    return "webp";
+  const head = buf.slice(0, 6).toString("ascii");
+  if (head === "GIF87a" || head === "GIF89a") return "gif";
+  return null;
+}
+
+const TYPE_TO_MIME: Record<ImageType, string> = {
+  jpeg: "image/jpeg",
+  png: "image/png",
+  webp: "image/webp",
+  gif: "image/gif",
+};
+
+const TYPE_TO_EXT: Record<ImageType, string> = {
+  jpeg: "jpg",
+  png: "png",
+  webp: "webp",
+  gif: "gif",
+};
 
 export async function POST(req: Request) {
   if (!(await isAdmin())) {
@@ -29,22 +58,23 @@ export async function POST(req: Request) {
       { status: 413 },
     );
   }
-  if (!ALLOWED_TYPES.includes(file.type)) {
+
+  const buffer = Buffer.from(await file.arrayBuffer());
+  const detected = detectImageType(buffer);
+  if (!detected) {
     return NextResponse.json(
       { error: "Поддерживаются только JPEG / PNG / WebP / GIF" },
       { status: 415 },
     );
   }
 
-  const ext = (file.name.split(".").pop() ?? "bin").toLowerCase();
-  const filename = `${crypto.randomUUID()}.${ext}`;
-  const buffer = await file.arrayBuffer();
+  const filename = `${crypto.randomUUID()}.${TYPE_TO_EXT[detected]}`;
 
   const sb = supabaseAdmin();
   const { error } = await sb.storage
     .from(GIFTS_BUCKET)
     .upload(filename, buffer, {
-      contentType: file.type,
+      contentType: TYPE_TO_MIME[detected],
       upsert: false,
     });
   if (error) {
