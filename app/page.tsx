@@ -1,8 +1,8 @@
 import Image from "next/image";
-import Header from "@/components/Header";
+import Header from "@/components/layout/Header";
 import { getCurrentUser } from "@/lib/auth";
 import { listGifts } from "@/lib/gifts";
-import { GiftList } from "@/components/GiftList";
+import { GiftList } from "@/components/gift/GiftList";
 
 export const dynamic = "force-dynamic";
 

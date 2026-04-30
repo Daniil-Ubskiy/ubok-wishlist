@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
-import Header from "@/components/Header";
+import Header from "@/components/layout/Header";
 import { isAdmin } from "@/lib/admin";
 import { listGiftsForAdmin } from "@/lib/gifts";
-import { AdminGiftsManager } from "@/components/AdminGiftsManager";
+import { AdminGiftsManager } from "@/components/admin/AdminGiftsManager";
 
 export const dynamic = "force-dynamic";
 

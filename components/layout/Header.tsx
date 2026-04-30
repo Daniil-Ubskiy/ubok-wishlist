@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Gift } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
-import { LogoutButton } from "./LogoutButton";
+import { LogoutButton } from "../auth/LogoutButton";
 import { ThemeToggle } from "./ThemeToggle";
 
 export default async function Header() {

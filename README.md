@@ -101,22 +101,22 @@ npm run dev
 
 ```
 app/
-  page.tsx              — главная
-  login/page.tsx        — вход
-  me/page.tsx           — мои брони
-  admin/login/page.tsx  — пароль
-  admin/page.tsx        — CRUD
-  api/...               — API routes
+  page.tsx                   — главная
+  login/page.tsx             — вход
+  me/page.tsx                — мои брони
+  admin/login/page.tsx       — пароль
+  admin/page.tsx             — CRUD
+  api/...                    — API routes
 lib/
-  supabase.ts           — клиенты (anon + service-role)
-  auth.ts               — auth по cookie
-  admin.ts              — admin auth
-  gifts.ts              — server-side helpers
+  supabase.ts                — клиенты (anon + service-role)
+  auth.ts                    — auth по cookie
+  admin.ts                   — admin auth (timing-safe)
+  gifts.ts                   — server-side helpers
   types.ts
 components/
-  GiftCard.tsx          — карточка подарка
-  GiftList.tsx          — список с интерактивом бронирования
-  GiftForm.tsx          — форма create/edit
-  AdminGiftsManager.tsx — админский CRUD
-  ...
+  ui/                        — примитивы (Button, Input)
+  gift/                      — GiftCard, GiftList, GiftForm, MyBookings
+  auth/                      — LoginForm, LogoutButton
+  admin/                     — AdminLoginForm, AdminGiftsManager
+  layout/                    — Header, ThemeToggle
 ```

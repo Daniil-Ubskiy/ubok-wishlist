@@ -3,8 +3,8 @@
 import { useState, type ChangeEvent, type FormEvent } from "react";
 import Image from "next/image";
 import { Upload } from "lucide-react";
-import { Input } from "./ui/Input";
-import { Button } from "./ui/Button";
+import { Input } from "../ui/Input";
+import { Button } from "../ui/Button";
 import type { Gift } from "@/lib/types";
 
 interface Props {

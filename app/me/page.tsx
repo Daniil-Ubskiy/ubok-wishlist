@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
-import Header from "@/components/Header";
+import Header from "@/components/layout/Header";
 import { getCurrentUser } from "@/lib/auth";
 import { listGifts } from "@/lib/gifts";
-import { MyBookings } from "@/components/MyBookings";
+import { MyBookings } from "@/components/gift/MyBookings";
 
 export const dynamic = "force-dynamic";
 

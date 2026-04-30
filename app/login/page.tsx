@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
-import Header from "@/components/Header";
+import Header from "@/components/layout/Header";
 import { getCurrentUser } from "@/lib/auth";
-import { LoginForm } from "@/components/LoginForm";
+import { LoginForm } from "@/components/auth/LoginForm";
 
 export const dynamic = "force-dynamic";
 

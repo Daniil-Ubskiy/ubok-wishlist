@@ -3,8 +3,8 @@
 import { useState } from "react";
 import Image from "next/image";
 import { Pencil, Trash2, Plus, X } from "lucide-react";
-import { Button } from "./ui/Button";
-import { GiftForm } from "./GiftForm";
+import { Button } from "../ui/Button";
+import { GiftForm } from "../gift/GiftForm";
 import type { Gift } from "@/lib/types";
 
 interface Props {

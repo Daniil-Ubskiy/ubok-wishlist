@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
-import Header from "@/components/Header";
+import Header from "@/components/layout/Header";
 import { isAdmin } from "@/lib/admin";
-import { AdminLoginForm } from "@/components/AdminLoginForm";
+import { AdminLoginForm } from "@/components/admin/AdminLoginForm";
 
 export const dynamic = "force-dynamic";
 

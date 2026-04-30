@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { ExternalLink, Lock, X } from "lucide-react";
 import clsx from "clsx";
-import { Button } from "./ui/Button";
+import { Button } from "../ui/Button";
 import type { GiftWithStatus } from "@/lib/types";
 
 interface Props {
