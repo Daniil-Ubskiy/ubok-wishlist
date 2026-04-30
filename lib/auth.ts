@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { cookies } from "next/headers";
 import { supabaseAdmin } from "./supabase";
 import type { User } from "./types";
@@ -10,7 +11,7 @@ export async function getAuthToken(): Promise<string | null> {
   return cookieStore.get(AUTH_COOKIE)?.value ?? null;
 }
 
-export async function getCurrentUser(): Promise<User | null> {
+export const getCurrentUser = cache(async (): Promise<User | null> => {
   const token = await getAuthToken();
   if (!token) return null;
 
@@ -25,7 +26,7 @@ export async function getCurrentUser(): Promise<User | null> {
   } catch {
     return null;
   }
-}
+});
 
 export async function setAuthCookie(token: string): Promise<void> {
   const cookieStore = await cookies();

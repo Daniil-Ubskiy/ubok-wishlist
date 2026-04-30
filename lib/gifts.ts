@@ -5,30 +5,49 @@ export async function listGifts(
   currentUserId: string | null,
 ): Promise<GiftWithStatus[]> {
   const sb = supabaseAdmin();
-  const [giftsRes, bookingsRes] = await Promise.all([
-    sb
-      .from("gifts")
-      .select("*")
-      .order("position", { ascending: true })
-      .order("created_at", { ascending: true }),
-    sb.from("bookings").select("id, gift_id, user_id"),
+
+  const giftsPromise = sb
+    .from("gifts")
+    .select("*")
+    .order("position", { ascending: true })
+    .order("created_at", { ascending: true });
+
+  const allBookingsPromise = sb.from("bookings").select("gift_id");
+
+  const myBookingsPromise = currentUserId
+    ? sb.from("bookings").select("id, gift_id").eq("user_id", currentUserId)
+    : null;
+
+  const [giftsRes, allBookingsRes, myBookingsRes] = await Promise.all([
+    giftsPromise,
+    allBookingsPromise,
+    myBookingsPromise,
   ]);
 
   if (giftsRes.error) throw giftsRes.error;
-  if (bookingsRes.error) throw bookingsRes.error;
+  if (allBookingsRes.error) throw allBookingsRes.error;
+  if (myBookingsRes?.error) throw myBookingsRes.error;
 
-  const byGift = new Map<string, { id: string; user_id: string }>();
-  for (const b of bookingsRes.data ?? []) {
-    byGift.set(b.gift_id, { id: b.id, user_id: b.user_id });
+  const bookedSet = new Set<string>();
+  for (const b of (allBookingsRes.data ?? []) as { gift_id: string }[]) {
+    bookedSet.add(b.gift_id);
   }
 
-  return (giftsRes.data ?? []).map((g: Gift) => {
-    const booking = byGift.get(g.id);
+  const myBookingByGift = new Map<string, string>();
+  for (const b of (myBookingsRes?.data ?? []) as {
+    id: string;
+    gift_id: string;
+  }[]) {
+    myBookingByGift.set(b.gift_id, b.id);
+  }
+
+  return ((giftsRes.data ?? []) as Gift[]).map((g) => {
+    const myBookingId = myBookingByGift.get(g.id) ?? null;
     return {
       ...g,
-      is_booked: Boolean(booking),
-      booked_by_me: Boolean(booking) && booking?.user_id === currentUserId,
-      booking_id: booking?.id ?? null,
+      is_booked: bookedSet.has(g.id),
+      booked_by_me: myBookingId !== null,
+      booking_id: myBookingId,
     };
   });
 }
