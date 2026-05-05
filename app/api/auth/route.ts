@@ -14,23 +14,38 @@ export async function POST(req: Request) {
   }
 
   const sb = supabaseAdmin();
-  const { data, error } = await sb
-    .from("users")
-    .insert({ name })
-    .select("*")
-    .single();
+  const normalized = name.toLowerCase();
 
-  if (error || !data) {
-    return NextResponse.json(
-      { error: "Не удалось создать пользователя" },
-      { status: 500 },
-    );
+  const existing = await sb
+    .from("users")
+    .select("*")
+    .eq("name_normalized", normalized)
+    .maybeSingle();
+
+  if (existing.error) {
+    return NextResponse.json({ error: "Ошибка БД" }, { status: 500 });
   }
 
-  await setAuthCookie(data.token);
+  let user = existing.data;
+  if (!user) {
+    const created = await sb
+      .from("users")
+      .insert({ name })
+      .select("*")
+      .single();
+    if (created.error || !created.data) {
+      return NextResponse.json(
+        { error: "Не удалось создать пользователя" },
+        { status: 500 },
+      );
+    }
+    user = created.data;
+  }
+
+  await setAuthCookie(user.token);
   return NextResponse.json({
     ok: true,
-    user: { id: data.id, name: data.name },
+    user: { id: user.id, name: user.name },
   });
 }
 

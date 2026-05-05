@@ -20,9 +20,12 @@
 create table users (
   id uuid primary key default gen_random_uuid(),
   name text not null,
+  name_normalized text generated always as (lower(trim(name))) stored,
   token text unique not null default encode(gen_random_bytes(32), 'hex'),
   created_at timestamptz default now()
 );
+
+create unique index users_name_normalized_idx on users (name_normalized);
 
 create table gifts (
   id uuid primary key default gen_random_uuid(),
