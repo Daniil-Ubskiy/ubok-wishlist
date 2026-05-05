@@ -1,8 +1,13 @@
 "use client";
 
-import { useState, type ChangeEvent, type FormEvent } from "react";
+import {
+  useRef,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+} from "react";
 import Image from "next/image";
-import { Upload } from "lucide-react";
+import { Upload, X } from "lucide-react";
 import { Input } from "../ui/Input";
 import { Button } from "../ui/Button";
 import type { Gift } from "@/lib/types";
@@ -24,6 +29,7 @@ export function GiftForm({ initialGift, onSaved }: Props) {
   const [pending, setPending] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const replaceInputRef = useRef<HTMLInputElement>(null);
 
   async function handleFile(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -117,21 +123,45 @@ export function GiftForm({ initialGift, onSaved }: Props) {
       <div className="flex flex-col gap-2">
         <span className="text-sm font-medium text-text">Фото</span>
         {imageUrl ? (
-          <div className="relative aspect-[16/10] overflow-hidden rounded-xl bg-slate-100 dark:bg-slate-800">
-            <Image
-              src={imageUrl}
-              alt="preview"
-              fill
-              className="object-cover"
-              sizes="600px"
+          <div className="flex flex-col gap-3">
+            <div className="relative aspect-[16/10] overflow-hidden rounded-xl bg-slate-100 dark:bg-slate-800">
+              <Image
+                src={imageUrl}
+                alt="preview"
+                fill
+                className="object-cover"
+                sizes="600px"
+              />
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => replaceInputRef.current?.click()}
+                disabled={uploading}
+              >
+                <Upload className="h-4 w-4" />
+                {uploading ? "Загружаем…" : "Заменить"}
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setImageUrl("")}
+                disabled={uploading}
+              >
+                <X className="h-4 w-4" /> Удалить
+              </Button>
+            </div>
+            <input
+              ref={replaceInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              className="sr-only"
+              onChange={handleFile}
+              disabled={uploading}
             />
-            <button
-              type="button"
-              onClick={() => setImageUrl("")}
-              className="absolute right-2 top-2 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-text shadow"
-            >
-              Убрать
-            </button>
           </div>
         ) : (
           <label className="flex h-24 cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-bg text-text-muted transition-colors hover:bg-slate-50 dark:hover:bg-slate-800">

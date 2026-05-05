@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { isAdmin } from "@/lib/admin";
 import { supabaseAdmin } from "@/lib/supabase";
+import { deleteGiftImageIfOurs } from "@/lib/storage";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -28,6 +29,14 @@ export async function PATCH(req: Request, ctx: Ctx) {
   }
 
   const sb = supabaseAdmin();
+
+  const before = await sb
+    .from("gifts")
+    .select("image_url")
+    .eq("id", id)
+    .single();
+  const oldImageUrl: string | null = before.data?.image_url ?? null;
+
   const { data, error } = await sb
     .from("gifts")
     .update(update)
@@ -41,6 +50,11 @@ export async function PATCH(req: Request, ctx: Ctx) {
       { status: 500 },
     );
   }
+
+  if ("image_url" in update && oldImageUrl && oldImageUrl !== data.image_url) {
+    await deleteGiftImageIfOurs(oldImageUrl);
+  }
+
   return NextResponse.json({ gift: data });
 }
 
@@ -50,9 +64,20 @@ export async function DELETE(_req: Request, ctx: Ctx) {
   }
   const { id } = await ctx.params;
   const sb = supabaseAdmin();
+
+  const before = await sb
+    .from("gifts")
+    .select("image_url")
+    .eq("id", id)
+    .single();
+  const oldImageUrl: string | null = before.data?.image_url ?? null;
+
   const { error } = await sb.from("gifts").delete().eq("id", id);
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
+
+  await deleteGiftImageIfOurs(oldImageUrl);
+
   return NextResponse.json({ ok: true });
 }
